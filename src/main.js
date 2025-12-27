@@ -103,8 +103,8 @@ function analyzeSalesData(data, options) {
 
       const profit = revenue - cost;
 
-      seller.revenue += revenue;
-      seller.profit += profit;
+      seller.revenue += Math.round(revenue * 100);
+      seller.profit += Math.round(profit * 100);
 
       if (!seller.products_sold[item.sku]) {
         seller.products_sold[item.sku] = 0;
@@ -134,8 +134,8 @@ function analyzeSalesData(data, options) {
   return sellerStats.map((seller) => ({
     seller_id: seller.id,
     name: seller.name,
-    revenue: +seller.revenue.toFixed(2),
-    profit: +seller.profit.toFixed(2),
+    revenue: seller.revenue / 100,
+    profit: seller.profit / 100,
     sales_count: seller.sales_count,
     top_products: seller.top_products,
     bonus: +seller.bonus.toFixed(2),
