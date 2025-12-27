@@ -17,7 +17,7 @@ function calculateSimpleRevenue(purchase, product) {
  * @param seller карточка продавца
  * @returns {number}
  */
-function calculateBonusByProfit({ seller, index, total }) {
+function calculateBonusByProfit(seller, index, total) {
   if (index === 0) {
     return seller.profit * 0.15;
   } else if (index === 1 || index === 2) {
@@ -44,7 +44,9 @@ function analyzeSalesData(data, options) {
     !Array.isArray(data.sellers) ||
     !Array.isArray(data.products) ||
     !Array.isArray(data.purchase_records) ||
-    data.sellers.length === 0
+    data.sellers.length === 0 ||
+    data.products.length === 0 ||
+    data.purchase_records.length === 0
   ) {
     throw new Error("Некорректные входные данные");
   }
@@ -97,12 +99,12 @@ function analyzeSalesData(data, options) {
 
       const cost = product.purchase_price * item.quantity;
 
-      const revenue = calculateSimpleRevenue(item, product);
+      const revenue = calculateRevenue(item, product);
 
       const profit = revenue - cost;
 
-      seller.revenue += revenue;
-      seller.profit += profit;
+      seller.revenue = +(seller.revenue + revenue).toFixed(2);
+      seller.profit = +(seller.profit + profit).toFixed(2);
 
       if (!seller.products_sold[item.sku]) {
         seller.products_sold[item.sku] = 0;
@@ -119,11 +121,7 @@ function analyzeSalesData(data, options) {
   // @TODO: Назначение премий на основе ранжирования
 
   sellerStats.forEach((seller, index) => {
-    seller.bonus = calculateBonusByProfit({
-      seller,
-      index,
-      total: sellerStats.length,
-    });
+    seller.bonus = calculateBonusByProfit(seller, index, sellerStats.length);
 
     seller.top_products = Object.entries(seller.products_sold)
       .map(([sku, quantity]) => ({ sku, quantity }))
