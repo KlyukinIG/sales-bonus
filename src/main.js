@@ -127,8 +127,6 @@ function analyzeSalesData(data, options) {
       .map(([sku, quantity]) => ({ sku, quantity }))
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 10);
-
-    console.log(seller.top_products);
   });
 
   // @TODO: Подготовка итоговой коллекции с нужными полями
