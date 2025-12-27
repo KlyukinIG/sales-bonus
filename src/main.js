@@ -4,26 +4,9 @@
  * @param _product карточка товара
  * @returns {number}
  */
-function calculateSimpleRevenue(purchase, _product) {
-  const { discount = 0, sale_price, quantity } = purchase;
-
-  if (sale_price == null || quantity == null) {
-    throw new Error("Некорректные данные покупки");
-  }
-
-  if (sale_price < 0 || quantity <= 0) {
-    throw new Error("Цена или количество некорректны");
-  }
-
-  if (discount < 0 || discount > 100) {
-    throw new Error("Скидка должна быть от 0 до 100%");
-  }
-
-  const decimalDiscount = discount / 100;
-  const fullPrice = sale_price * quantity;
-  const revenueWithDiscount = fullPrice * (1 - decimalDiscount);
-
-  return Math.round(revenueWithDiscount * 100) / 100;
+function calculateSimpleRevenue(purchase, product) {
+  const discount = 1 - purchase.discount / 100;
+  return purchase.sale_price * purchase.quantity * discount;
 }
 // @TODO: Расчет выручки от операции
 
@@ -111,6 +94,8 @@ function analyzeSalesData(data, options) {
     const seller = sellerIndex[record.seller_id];
     seller.sales_count = seller.sales_count + 1;
 
+    seller.revenue += record.total_amount;
+
     record.items.forEach((item) => {
       const product = productIndex[item.sku];
 
@@ -120,7 +105,6 @@ function analyzeSalesData(data, options) {
 
       const profit = revenue - cost;
 
-      seller.revenue += revenue;
       seller.profit += profit;
 
       if (!seller.products_sold[item.sku]) {
@@ -138,7 +122,7 @@ function analyzeSalesData(data, options) {
   // @TODO: Назначение премий на основе ранжирования
 
   sellerStats.forEach((seller, index) => {
-    seller.bonus = calculateBonusByProfit(index, sellerStats.length, seller);
+    seller.bonus = calculateBonus(index, sellerStats.length, seller);
 
     seller.top_products = Object.entries(seller.products_sold)
       .map(([sku, quantity]) => ({ sku, quantity }))
@@ -151,7 +135,7 @@ function analyzeSalesData(data, options) {
   return sellerStats.map((seller) => ({
     seller_id: seller.id,
     name: seller.name,
-    revenue: +seller.revenue.toFixed(2),
+    revenue: +seller.revenue.toFixed(4),
     profit: +seller.profit.toFixed(2),
     sales_count: seller.sales_count,
     top_products: seller.top_products,
