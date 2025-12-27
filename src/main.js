@@ -4,9 +4,26 @@
  * @param _product карточка товара
  * @returns {number}
  */
-function calculateSimpleRevenue(purchase, product) {
-  const discount = 1 - purchase.discount / 100;
-  return purchase.sale_price * purchase.quantity * discount;
+function calculateSimpleRevenue(purchase, _product) {
+  const { discount = 0, sale_price, quantity } = purchase;
+
+  if (sale_price == null || quantity == null) {
+    throw new Error("Некорректные данные покупки");
+  }
+
+  if (sale_price < 0 || quantity <= 0) {
+    throw new Error("Цена или количество некорректны");
+  }
+
+  if (discount < 0 || discount > 100) {
+    throw new Error("Скидка должна быть от 0 до 100%");
+  }
+
+  const decimalDiscount = discount / 100;
+  const fullPrice = sale_price * quantity;
+  const revenueWithDiscount = fullPrice * (1 - decimalDiscount);
+
+  return Math.round(revenueWithDiscount * 100) / 100;
 }
 // @TODO: Расчет выручки от операции
 
