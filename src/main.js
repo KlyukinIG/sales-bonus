@@ -17,7 +17,7 @@ function calculateSimpleRevenue(purchase, product) {
  * @param seller карточка продавца
  * @returns {number}
  */
-function calculateBonusByProfit(seller, index, total) {
+function calculateBonusByProfit(index, total, seller) {
   if (index === 0) {
     return seller.profit * 0.15;
   } else if (index === 1 || index === 2) {
@@ -103,8 +103,8 @@ function analyzeSalesData(data, options) {
 
       const profit = revenue - cost;
 
-      seller.revenue = +(seller.revenue + revenue).toFixed(2);
-      seller.profit = +(seller.profit + profit).toFixed(2);
+      seller.revenue += revenue;
+      seller.profit += profit;
 
       if (!seller.products_sold[item.sku]) {
         seller.products_sold[item.sku] = 0;
